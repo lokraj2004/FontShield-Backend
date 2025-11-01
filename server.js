@@ -9,10 +9,17 @@ dotenv.config();
 
 const app = express();
 // FIX: Use environment port for production
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 8000;
+const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+
+// Define allowed origins
+const allowedOrigins = [
+  'http://localhost:5173', // Your local frontend
+  process.env.FRONTEND_URL // Your deployed frontend URL from .env
+].filter(Boolean); // Filter out undefined/null values
 
 // Middleware
-app.use(cors()); // Allow requests from our React frontend
+app.use(cors({ origin: allowedOrigins })); // Restrict requests to allowed origins
 app.use(express.json()); // To parse JSON request bodies
 app.use(helmet()); // ADD THIS for security
 
@@ -88,7 +95,7 @@ app.post('/api/chat', async (req, res) => {
 });
 
 
-app.listen(port, () => {
-  // FIX: Show the dynamic port
-    console.log(`✅ Server running on port ${port}`);
+app.listen(port, host, () => {
+  // FIX: Show the dynamic port and host
+    console.log(`✅ Server running at http://${host}:${port}`);
 });
