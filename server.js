@@ -2,16 +2,19 @@ const express = require('express');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const helmet = require('helmet'); // ADD THIS
 const { getModelForRequest } = require('./model-switcher');
 
 dotenv.config();
 
 const app = express();
-const port = 3001; // Port for our backend server
+// FIX: Use environment port for production
+const port = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors()); // Allow requests from our React frontend
 app.use(express.json()); // To parse JSON request bodies
+app.use(helmet()); // ADD THIS for security
 
 // --- Configure Gemini ---
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -21,7 +24,7 @@ if (!GEMINI_API_KEY) {
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 // Minimum response time in milliseconds (10 seconds)
-const MIN_RESPONSE_TIME_MS = 10000;
+const MIN_RESPONSE_TIME_MS = 8000;
 
 // --- API Endpoint ---
 app.post('/api/chat', async (req, res) => {
@@ -72,5 +75,6 @@ app.post('/api/chat', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`✅ Server running at http://localhost:${port}`);
+  // FIX: Show the dynamic port
+    console.log(`✅ Server running on port ${port}`);
 });
