@@ -26,6 +26,11 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 // Minimum response time in milliseconds (10 seconds)
 const MIN_RESPONSE_TIME_MS = 8000;
 
+// **Add this route:**
+app.get('/', (req, res) => {
+  res.send('The server is up and running!');
+});
+
 // --- API Endpoint ---
 app.post('/api/chat', async (req, res) => {
   const startTime = Date.now();
@@ -44,10 +49,17 @@ app.post('/api/chat', async (req, res) => {
     // Dynamically select the model based on the input message length
     const { model } = await getModelForRequest(genAI, message);
 
+    // FIX: Ensure history starts with a 'user' role if it's not empty.
+    let sanitizedHistory = history || [];
+    const firstUserIndex = sanitizedHistory.findIndex(item => item.role === 'user');
+    if (firstUserIndex > 0) {
+      sanitizedHistory = sanitizedHistory.slice(firstUserIndex);
+    }
+
     // The genAI SDK expects a specific format for history.
     // We will build the prompt with history here.
     const chat = model.startChat({
-      history: history || [],
+      history: sanitizedHistory,
       generationConfig: {
         maxOutputTokens: 1000,
       },
@@ -73,6 +85,7 @@ app.post('/api/chat', async (req, res) => {
     res.status(500).json({ error: 'Failed to get response from AI' });
   }
 });
+
 
 app.listen(port, () => {
   // FIX: Show the dynamic port
