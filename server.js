@@ -31,6 +31,7 @@ app.get('/', (req, res) => {
   res.send('The server is up and running!');
 });
 
+
 // --- API Endpoint ---
 app.post('/api/chat', async (req, res) => {
   const startTime = Date.now();
